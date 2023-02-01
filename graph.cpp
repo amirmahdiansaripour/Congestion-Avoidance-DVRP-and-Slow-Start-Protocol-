@@ -17,6 +17,65 @@ vector<string> Graph::splitBySpace(string unsplitted){
     return lastRes;
 }
 
+
+void Graph::printIteration(map<pair<string, string>, int> table, int iter){
+    cout << "ITERATION NO. " << iter << "\n"; 
+    set<string> :: iterator it;
+    set<string> :: iterator po;
+    for(it = nodes.begin(); it != nodes.end(); it++){
+        cout << "\t" << *it;
+    }
+    cout << "\n";
+    for(it = nodes.begin(); it != nodes.end(); it++){
+        cout << *it << "\t";
+        for(po = nodes.begin(); po != nodes.end(); po++){
+            int weight = table[make_pair(*it, *po)];
+            if(weight == INT_MAX) cout << 0 << "\t";
+            else cout << weight << "\t";
+        }
+        cout << "\n";
+    }
+    cout << "\n---------------------------------------------\n\n";
+}
+
+void Graph::DVRP(){
+    map<pair<string, string>, int> table;
+    set<string> :: iterator it;
+    set<string> :: iterator po;
+    set<string> :: iterator xy;
+    
+    for(it = nodes.begin(); it != nodes.end(); it++){
+        for(po = nodes.begin(); po != nodes.end(); po++){
+            if(*po == *it){
+                table[make_pair(*it, *po)] = 0; 
+            }
+            else if(edges[make_pair(*it, *po)] != 0){
+                table[make_pair(*it, *po)] = edges[make_pair(*it, *po)];
+            }
+            else if(edges[make_pair(*it, *po)] == 0){
+                table[make_pair(*it, *po)] = INT_MAX;
+            }
+        }
+    }
+
+    int iter = 1;
+
+    for(it = nodes.begin(); it != nodes.end(); it++){
+        printIteration(table, iter);
+        iter++;
+        for(po = nodes.begin(); po != nodes.end(); po++){
+            for(xy = nodes.begin(); xy != nodes.end(); xy++){
+                if (table[make_pair(*po, *it)] != INT_MAX &&
+                    table[make_pair(*it, *xy)] != INT_MAX &&
+                    table[make_pair(*po, *it)] + table[make_pair(*it, *xy)] < table[make_pair(*po, *xy)])
+
+                    table[make_pair(*po, *xy)] = table[make_pair(*po, *it)] + table[make_pair(*it, *xy)];
+            }
+        }
+    }
+
+}
+
 void Graph::printData(){
     set<string> :: iterator p;
     cout << "nodes : ";
@@ -48,7 +107,7 @@ void Graph::addEdge(string data){
     edges[make_pair(splittedMessage[3], splittedMessage[2])] = stoi(splittedMessage[4]);  
 }
 
-void Graph::bellmanFord(){
+void Graph::bellmanFord(string source){
     // printData();
     map<string, int> dist;
     map<string, string> parent;
@@ -58,7 +117,7 @@ void Graph::bellmanFord(){
         parent[*p] = *p;
     }
     // cout << "HI\n";
-    dist[*(nodes.begin())] = 0;
+    dist[source] = 0;
     while(1){
         bool change = false;
         map<pair<string, string>, int> :: iterator it;
@@ -74,13 +133,24 @@ void Graph::bellmanFord(){
         }
         if(change == false) break;
     }
-    // cout << "HI\n";
     set<string> :: iterator t;
     for(t = nodes.begin(); t != nodes.end(); t++){
-        cout << "Node: " << *t << "\n";
-        cout << "Dist: " << dist[*t] << "\n";
-        cout << "Parent : " << parent[*t] << "\n\n\n";
+        if(*t != source){
+            while(parent[parent[*t]] != source){
+                parent[*t] = parent[parent[*t]];
+            }
+            cout << "Node: " << *t << "\n";
+            cout << "Dist: " << dist[*t] << "\n";
+            cout << "Interface : " << parent[*t] << "\n";    
+            cout << "-------------------------------\n";        
+        }
     }
+}
+
+void Graph::removeLink(string s){
+    vector<string> splittedMessage = splitBySpace(s);
+    edges[make_pair(splittedMessage[2], splittedMessage[3])] = INT_MAX;
+    edges[make_pair(splittedMessage[3], splittedMessage[2])] = INT_MAX;  
 }
 
 Graph::Graph(){}

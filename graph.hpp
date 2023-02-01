@@ -19,8 +19,11 @@ public:
     vector<string> splitBySpace(string);
     void addHost(string);
     void addEdge(string);
-    void bellmanFord();
+    void removeLink(string);
+    void bellmanFord(string);
     void printData();
+    void DVRP();
+    void printIteration(map<pair<string, string>, int>, int);
 };
 
 #endif

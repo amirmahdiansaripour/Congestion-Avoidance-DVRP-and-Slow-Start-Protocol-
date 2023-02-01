@@ -21,7 +21,16 @@ int main(){
     while(getline(cin, s)){
         vector<string> splitted = splitBySpace(s);
         if(splitted[0] == "run"){
-            g.bellmanFord();
+            // g.bellmanFord();
+        }
+        else if(splitted[0] == "remove"){
+            g.removeLink(s);
+        }
+        else if(splitted[0] == "print"){
+            g.DVRP();
+        }
+        else if(splitted[0] == "show" && splitted[1] == "table"){
+            g.bellmanFord(splitted[2]);
         }
         else if(splitted[0] == "add" && (splitted[1] == "hosts" || splitted[1] == "routers")){
             g.addHost(s);
@@ -29,5 +38,6 @@ int main(){
         else if(splitted[1] == "link" && (splitted[0] == "add" || splitted[0] == "update")){
             g.addEdge(s);
         }
+        
     }
 }
