@@ -139,7 +139,7 @@ void Sender::run() {
         select(maxFd + 1, &tempFd, NULL, NULL, NULL);
         if (FD_ISSET(fromRouter->fd, &tempFd)){ // getfromrouter
            string message = fromRouter->receive();
-           cout << "Message from router: " << message << "\n";
+        //    cout << "Message from router: " << message << "\n";
            if(firstRound){
                 firstRound = false;
                 toRouter->send(packets[0]);
@@ -163,7 +163,7 @@ void Sender::run() {
 
 void Sender::handleTimeout(){
     lastDepart = clock();
-    cout << "Timeout\n";
+    cout << "\n\nTIMEOUT\n\n";
     treshold = cwnd / 2;    // multiple decrease
     threasholds.push_back(treshold);
     cwnd = 1;
@@ -177,7 +177,7 @@ void Sender::updateCWND(){
         lastDepart = clock();
         if(cwnd >= treshold){
             cwnd++; // additive increase
-            cout << "ADDITIVE INCREASE\n";
+            cout << "\n\nADDITIVE INCREASE\n\n";
             cwnds.push_back(cwnd);
         }
         else{

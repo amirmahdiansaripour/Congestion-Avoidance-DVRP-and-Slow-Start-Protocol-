@@ -105,7 +105,16 @@ void Router::showQueueContent(){
     cout << "Queue content: \n";
     for(string s : queue){
         findHeader(s);
-        cout << s.substr(0, indexHeader2) << "\n";
+        string ss = "";
+        int ind = 0;
+        for(int i = 0; i < s.size(); i++){
+            if(s[i] == '/'){
+                if(ind == 1) break;
+                ind++;
+            }
+            ss += s[i];
+        }
+        cout << ss << "\n";
     }
 }
 

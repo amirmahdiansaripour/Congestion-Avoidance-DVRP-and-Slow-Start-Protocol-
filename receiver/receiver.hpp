@@ -12,7 +12,7 @@ const int MAXNUMOFPACKETS = 1100;
 
 class Receiver{
 public:
-    Receiver(std::string, std::string);
+    Receiver(std::string);
     void run();
     int searchFirstLost();
     void sendAck(std::string);

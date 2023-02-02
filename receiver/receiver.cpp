@@ -11,16 +11,16 @@ void Receiver::setSockets(){
         toRouter = new Socket(8003);
         fromRouter = new Socket(8004);
     }
-    else if(port == "172.16.0.1"){
-        if(routingTable[dest_port] == "172.16.0.0"){
-            toRouter = new Socket(8005);
-            fromRouter = new Socket(8006);
-        }
-        else if(routingTable[dest_port] == "172.16.1.0"){
-            toRouter = new Socket(8007);
-            fromRouter = new Socket(8008);
-        }
-    }
+    // else if(port == "172.16.0.1"){
+    //     if(routingTable[dest_port] == "172.16.0.0"){
+    //         toRouter = new Socket(8005);
+    //         fromRouter = new Socket(8006);
+    //     }
+    //     else if(routingTable[dest_port] == "172.16.1.0"){
+    //         toRouter = new Socket(8007);
+    //         fromRouter = new Socket(8008);
+    //     }
+    // }
 }
 
 void Receiver::extractRoutingTable(){
@@ -37,9 +37,8 @@ void Receiver::extractRoutingTable(){
 }
 
 
-Receiver::Receiver(string port_, string destPort_){
+Receiver::Receiver(string port_){
     port = port_;
-    dest_port = destPort_;
     extractRoutingTable();
     setSockets();
     Acks = vector<bool>(MAX_PACKET_IND, false);
@@ -110,7 +109,7 @@ bool Receiver::handlePacket(string packet){
     content[currAck] = packet.substr(indexHeader4 + 1, packet.size());
     int lostPacket = searchFirstLost();
     string message = makeAckMessage(lostPacket);
-    cout << "Messsage to router: " << message << "\n";
+    // cout << "Messsage to router: " << message << "\n";
     toRouter->send(message);
     if(lostPacket == MAXNUMOFPACKETS) return true;
     else return false;
@@ -130,6 +129,11 @@ void Receiver::run(){
         select(maxFd + 1, &tmpFd, NULL, NULL, NULL);
         if (FD_ISSET(fromRouter->fd, &tmpFd)){ // message from router
             string packet = fromRouter->receive(); 
+            if(dest_port == ""){
+                sendAck(packet);
+                int ind;
+                for(ind = indexHeader2 + 1; ind < indexHeader3; ind++) dest_port += packet[ind]; 
+            }
             bool res = handlePacket(packet);
             if(res) break;
         }
