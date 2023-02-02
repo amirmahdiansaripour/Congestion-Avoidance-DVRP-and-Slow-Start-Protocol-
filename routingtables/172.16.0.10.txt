@@ -1,0 +1,15 @@
+Node: 172.16.0.0	Dist: 2	Interface: 172.16.0.0
+Node: 172.16.0.1	Dist: 6	Interface: 172.16.0.0
+Node: 172.16.0.2	Dist: 8	Interface: 172.16.0.0
+Node: 172.16.0.20	Dist: 4	Interface: 172.16.0.0
+Node: 172.16.1.0	Dist: 6	Interface: 172.16.0.0
+Node: 172.16.1.50	Dist: 13	Interface: 172.16.0.0
+Node: 172.16.10.0	Dist: 12	Interface: 172.16.0.0
+Node: 172.16.150.0	Dist: 27	Interface: 172.16.0.0
+Node: 172.16.150.1	Dist: 36	Interface: 172.16.0.0
+Node: 172.16.150.10	Dist: 36	Interface: 172.16.0.0
+Node: 172.16.19.172	Dist: 13	Interface: 172.16.0.0
+Node: 172.16.2.0	Dist: 12	Interface: 172.16.0.0
+Node: 172.16.2.1	Dist: 16	Interface: 172.16.0.0
+Node: 172.16.29.0	Dist: 14	Interface: 172.16.0.0
+Node: 172.16.29.1	Dist: 15	Interface: 172.16.0.0

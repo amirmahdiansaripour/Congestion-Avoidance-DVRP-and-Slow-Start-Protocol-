@@ -11,6 +11,8 @@
 #include "logger.hpp"
 #include <experimental/filesystem>
 
+const int INF = 10000;
+
 using namespace std;
 
 class Graph{

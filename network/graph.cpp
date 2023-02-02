@@ -30,7 +30,7 @@ void Graph::printIteration(map<pair<string, string>, int> table, int iter){
         cout << *it << "\t";
         for(po = nodes.begin(); po != nodes.end(); po++){
             int weight = table[make_pair(*it, *po)];
-            if(weight == 10000) cout << 0 << "\t";
+            if(weight == INF) cout << 0 << "\t";
             else cout << weight << "\t";
         }
         cout << "\n";
@@ -52,7 +52,7 @@ void Graph::DVRP(){
                 table[make_pair(*it, *po)] = edges[make_pair(*it, *po)];
             }
             else if(edges[make_pair(*it, *po)] == 0){
-                table[make_pair(*it, *po)] = 10000;
+                table[make_pair(*it, *po)] = INF;
             }
         }
     }
@@ -62,14 +62,14 @@ void Graph::DVRP(){
     for(it = nodes.begin(); it != nodes.end(); it++){
         for(po = nodes.begin(); po != nodes.end(); po++){
             for(xy = nodes.begin(); xy != nodes.end(); xy++){
-                if (table[make_pair(*po, *it)] != 10000 &&
-                    table[make_pair(*it, *xy)] != 10000 &&
+                if (table[make_pair(*po, *it)] != INF &&
+                    table[make_pair(*it, *xy)] != INF &&
                     table[make_pair(*po, *it)] + table[make_pair(*it, *xy)] < table[make_pair(*po, *xy)])
 
                     table[make_pair(*po, *xy)] = table[make_pair(*po, *it)] + table[make_pair(*it, *xy)];
             }
         }
-        // printIteration(table, iter);
+        printIteration(table, iter);
         iter++;
     }
     end = clock();
@@ -139,7 +139,7 @@ void Graph::bellmanFord(string source){
     map<string, string> parent;
     set<string> :: iterator p;
     for(p = nodes.begin(); p != nodes.end(); p++){
-        dist[*p] = 10000;
+        dist[*p] = INF;
         parent[*p] = *p;
     }
     dist[source] = 0;
@@ -176,8 +176,8 @@ void Graph::showTable(string src){
 
 void Graph::removeLink(string s){
     vector<string> splittedMessage = splitBySpace(s);
-    edges[make_pair(splittedMessage[2], splittedMessage[3])] = 10000;
-    edges[make_pair(splittedMessage[3], splittedMessage[2])] = 10000;  
+    edges[make_pair(splittedMessage[2], splittedMessage[3])] = INF;
+    edges[make_pair(splittedMessage[3], splittedMessage[2])] = INF;  
     logger.record(s);
     DVRP();
 }
