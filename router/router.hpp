@@ -4,7 +4,7 @@
 #include"../socket/socket.hpp"
 #include <map>
 
-const int QUEUESIZE = 10;   // infinity (10000) is the first case
+const int QUEUESIZE = 10000;   // infinity (10000) is the first case
 const int MAXNUMOFPACKETS = 1100;
 const int DELAYCOEF = 100;
 const int DROPPROBABILITY = 10; // 0 if no need to drop
@@ -20,7 +20,7 @@ private:
     std::vector<std::string> queue;
     clock_t lastPacketSent;
     int numOfSents;
-    int indexHeader1, indexHeader2;
+    int indexHeader1, indexHeader2, indexHeader3, indexHeader4;
 public:
     Router(std::string);
     int max();

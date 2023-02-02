@@ -11,7 +11,7 @@
 const int MAXNUMOFPACKETS = 1100;
 const int INF = 10000;
 const int NEWLINE = 127;
-const int DELAYCOEF = 1;    // increase leads to long timeouts
+const int DELAYCOEF = 10;    // increase leads to long timeouts
 
 class Sender{
 public:

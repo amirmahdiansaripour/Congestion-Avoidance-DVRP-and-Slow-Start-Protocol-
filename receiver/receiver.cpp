@@ -2,10 +2,46 @@
 
 using namespace std;
 
-Receiver::Receiver(string port_, int toRouter_, int fromRouter_){
+void Receiver::setSockets(){
+    if(port == "172.16.0.10"){
+        toRouter = new Socket(8001);
+        fromRouter = new Socket(8002);
+    }
+    else if(port == "172.16.0.20"){
+        toRouter = new Socket(8003);
+        fromRouter = new Socket(8004);
+    }
+    else if(port == "172.16.0.1"){
+        if(routingTable[dest_port] == "172.16.0.0"){
+            toRouter = new Socket(8005);
+            fromRouter = new Socket(8006);
+        }
+        else if(routingTable[dest_port] == "172.16.1.0"){
+            toRouter = new Socket(8007);
+            fromRouter = new Socket(8008);
+        }
+    }
+}
+
+void Receiver::extractRoutingTable(){
+    string path = "../routingtables/" + port + ".txt";
+    ifstream file(path);
+    string row;
+    while(getline(file, row)){
+        vector<string> half_split = split(row, '\t');
+        string first = split(half_split[0], ' ')[1];
+        string second = split(half_split[2], ' ')[1];
+        // cout << "first " << first << "\tsecond " << second << "\n";
+        routingTable[first] = second;
+    }
+}
+
+
+Receiver::Receiver(string port_, string destPort_){
     port = port_;
-    toRouter=new Socket(toRouter_);    
-    fromRouter=new Socket(fromRouter_);
+    dest_port = destPort_;
+    extractRoutingTable();
+    setSockets();
     Acks = vector<bool>(MAX_PACKET_IND, false);
     content = vector<string>(MAXNUMOFPACKETS);
 }
@@ -15,7 +51,6 @@ void Receiver::sendAck(string packet){
     indexHeader2 = 0;
     indexHeader3 = 0;
     indexHeader4 = 0;
-    
     for(int i = 0; i < packet.size(); i++){
         if(packet[i] == '/'){
             indexHeader1 = i;
@@ -28,14 +63,12 @@ void Receiver::sendAck(string packet){
             break;
         }
     }
-
     for(int k = indexHeader2 + 1; k < packet.size(); k++){
         if(packet[k] == '/'){
             indexHeader3 = k;
             break;
         }
     }
-    
     for(int t = indexHeader3 + 1; t < packet.size(); t++){
         if(packet[t] == '/'){
             indexHeader4 = t;
@@ -64,7 +97,7 @@ void Receiver::reconstructFile(){
 }
 
 string Receiver::makeAckMessage(int lostPacket){
-    string ack = "1/" + to_string(1100 + (rand()%1000)) + "/" + port + "/" + dest + "/" + to_string(lostPacket);
+    string ack = "1/" + to_string(1100 + (rand()%1000)) + "/" + port + "/" + dest_port + "/" + to_string(lostPacket);
     return ack;
 }
 

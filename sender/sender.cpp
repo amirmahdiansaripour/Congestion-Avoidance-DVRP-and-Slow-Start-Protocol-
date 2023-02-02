@@ -116,7 +116,7 @@ void Sender::sendPacketsBasedCwd(){
             findHeader(packets[i]);
             // cout << packets[i] << "\n";
             // cout << "index1 " << indexHeader1 << " index2 " << indexHeader2 << "\n";
-            cout << "sent to Router: " << packets[i] << "\n";
+            cout << "sent to Router: " << packets[i].substr(0, indexHeader2) << "\n";
             toRouter->send(packets[i]);
         }
     }
@@ -139,7 +139,7 @@ void Sender::run() {
         select(maxFd + 1, &tempFd, NULL, NULL, NULL);
         if (FD_ISSET(fromRouter->fd, &tempFd)){ // getfromrouter
            string message = fromRouter->receive();
-           
+        //    cout << "Message from router: " << message << "\n";
            if(firstRound){
                 firstRound = false;
                 toRouter->send(packets[0]);
@@ -155,7 +155,7 @@ void Sender::run() {
                 }
            }
         }
-        if((clock()-lastDepart)/(CLOCKS_PER_SEC * DELAYCOEF) > 1){
+        if((float)(clock()-lastDepart)/(CLOCKS_PER_SEC * DELAYCOEF) > 1.0){
             handleTimeout();
         }
     }

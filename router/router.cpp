@@ -70,6 +70,9 @@ int Router::max(){
 void Router::findHeader(string packet){
     indexHeader1 = 0;
     indexHeader2 = 0;
+    indexHeader3 = 0;
+    indexHeader4 = 0;
+    
     for(int i = 0; i < packet.size(); i++){
         if(packet[i] == '/'){
             indexHeader1 = i;
@@ -79,6 +82,20 @@ void Router::findHeader(string packet){
     for(int j = indexHeader1 + 1; j < packet.size(); j++){
         if(packet[j] == '/'){
             indexHeader2 = j;
+            break;
+        }
+    }
+
+    for(int k = indexHeader2 + 1; k < packet.size(); k++){
+        if(packet[k] == '/'){
+            indexHeader3 = k;
+            break;
+        }
+    }
+    
+    for(int t = indexHeader3 + 1; t < packet.size(); t++){
+        if(packet[t] == '/'){
+            indexHeader4 = t;
             break;
         }
     }
@@ -96,7 +113,7 @@ void Router::run() {
     fd_set currFd, tempFd;
     FD_ZERO(&currFd);
     int maxFd = max();
-    for(int i = 1; i < froms.size(); i++)
+    for(int i = 0; i < froms.size(); i++)
         FD_SET(froms[i]->fd, &currFd);
     int counter = 0;
     while (true){
@@ -105,26 +122,38 @@ void Router::run() {
         for(int i = 0; i < froms.size(); i++){
             if(FD_ISSET(froms[i]->fd, &tempFd)){
                 string packet = froms[i]->receive();
-                cout << "PACKET: " << packet << "\n";
-                if(queue.size() < QUEUESIZE){
-                    queue.push_back(packet);
+                // cout << "PACKET: " << packet << "\n";
+                showQueueContent();
+                findHeader(packet);
+                // cout << indexHeader3 + 1 << "\t" << indexHeader4 << "\n";
+                // cout << packet[indexHeader3] << "\t" << packet[indexHeader4 - 1] << "\n";
+                string desti = "";
+                for(int l = indexHeader3 + 1; l < indexHeader4; l++){
+                    desti += packet[l];
+                }
+                // packet.substr(indexHeader3 + 1, indexHeader4);
+                if(packet[0] == '1'){   // it is an ACK
+                    // cout << "destination " << desti << "\n";
+                    tos[desti]->send(packet);
+                }
+                else{   // it is a packet
+                    if(queue.size() < QUEUESIZE){
+                        tos[desti]->send(packet);
+                        queue.push_back(packet);
+                    }
                 }
                 break;
             }
         }
-
-        // else if (FD_ISSET(fromReceiver->fd, &tempFd)){
-        //     string ackMessage = fromReceiver->receive();   
-        //     toSender->send(ackMessage);
-        // }
         // if((clock()-lastPacketSent)/(CLOCKS_PER_SEC/DELAYCOEF)>1){
         //     lastPacketSent = clock();
         //     if(queue.empty() == false){
         //         findHeader(queue[0]);
         //         if(indexHeader1 + 1 < indexHeader2){
+        //             string destination = queue[0].substr(indexHeader3 + 1, indexHeader3 + 12);
         //             int id = stoi(queue[0].substr(indexHeader1 + 1, indexHeader2));
         //             if(droppedPackets[id] == false){    
-        //                 toReceiver->send(queue[0]);
+        //                 tos[destination]->send(queue[0]);
         //                 numOfSents++;
         //             }
         //             else{
@@ -137,5 +166,4 @@ void Router::run() {
         //     }
         // }
     }
-
 }  
