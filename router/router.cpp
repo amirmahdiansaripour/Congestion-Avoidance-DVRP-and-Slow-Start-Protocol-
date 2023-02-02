@@ -39,6 +39,7 @@ Router::Router(string port_) {
     extractRoutingTable();
     setSockets();
     decideOnDropped();
+    firstTransmit = 0;
 }
 
 void Router::decideOnDropped(){
@@ -72,7 +73,6 @@ void Router::findHeader(string packet){
     indexHeader2 = 0;
     indexHeader3 = 0;
     indexHeader4 = 0;
-    
     for(int i = 0; i < packet.size(); i++){
         if(packet[i] == '/'){
             indexHeader1 = i;
@@ -109,6 +109,82 @@ void Router::showQueueContent(){
     }
 }
 
+int maxa(int a, int b, int c, int d){
+    int res = a;
+    if(res < b) res = b;
+    if(res < c) res = c;
+    if(res < d) res = d;
+    return res;  
+}
+
+void Router::handleNextPackets(){
+    fd_set currFd2, tempFd2;
+    FD_ZERO(&currFd2);
+    FD_SET(fromReceiver->fd, &currFd2);
+    FD_SET(fromSender->fd, &currFd2); 
+    FD_SET(toSender->fd, &currFd2);
+    FD_SET(toReceiver->fd, &currFd2); 
+    int maxFd = maxa(toReceiver->fd, toSender->fd, fromReceiver->fd, fromSender->fd);
+    while(true){
+        tempFd2 = currFd2;
+        select(maxFd + 1, &tempFd2, NULL, NULL, NULL);
+        if (FD_ISSET(fromSender->fd, &tempFd2)){
+            string packet = fromSender->receive();
+            if(queue.size() < QUEUESIZE){
+                queue.push_back(packet);
+            }
+            cout << packet.substr(0, 10);
+        }
+        else if (FD_ISSET(fromReceiver->fd, &tempFd2)){
+            string ackMessage = fromReceiver->receive();   
+            toSender->send(ackMessage);
+        }
+        if((clock()-lastPacketSent)/(CLOCKS_PER_SEC/DELAYCOEF)>1){
+            lastPacketSent = clock();
+            if(queue.empty() == false){
+                findHeader(queue[0]);
+                if(indexHeader1 + 1 < indexHeader2){
+                    int id = stoi(queue[0].substr(indexHeader1 + 1, indexHeader2));
+                    if(droppedPackets[id] == false){    
+                        toReceiver->send(queue[0]);
+                        numOfSents++;
+                    }
+                    else{
+                        cout << "PACKET IS DROPPED\n";
+                        droppedPackets[id] = false;     // dont drop this anymore
+                    }
+                    showQueueContent();
+                    queue.erase(queue.begin());
+                }
+            }
+        }
+    }
+}
+
+void Router::handleTransmit(fd_set tempFd){
+    for(int i = 0; i < froms.size(); i++){
+        if(FD_ISSET(froms[i]->fd, &tempFd)){
+            string packet = froms[i]->receive();
+            findHeader(packet);
+            string desti = "";
+            for(int l = indexHeader3 + 1; l < indexHeader4; l++){
+                desti += packet[l];
+            }
+            if(packet[0] == '1'){   // First ACK
+                fromReceiver = froms[i];
+                toSender = tos[desti];
+                tos[desti]->send(packet);
+            }
+            else{   // First packet
+                fromSender = froms[i];
+                toReceiver = tos[desti];
+                toReceiver->send(packet);
+                handleNextPackets();
+            }
+        }
+    }
+}
+
 void Router::run() {
     fd_set currFd, tempFd;
     FD_ZERO(&currFd);
@@ -119,51 +195,6 @@ void Router::run() {
     while (true){
         tempFd = currFd;
         select(maxFd + 1, &tempFd, NULL, NULL, NULL);
-        for(int i = 0; i < froms.size(); i++){
-            if(FD_ISSET(froms[i]->fd, &tempFd)){
-                string packet = froms[i]->receive();
-                // cout << "PACKET: " << packet << "\n";
-                showQueueContent();
-                findHeader(packet);
-                // cout << indexHeader3 + 1 << "\t" << indexHeader4 << "\n";
-                // cout << packet[indexHeader3] << "\t" << packet[indexHeader4 - 1] << "\n";
-                string desti = "";
-                for(int l = indexHeader3 + 1; l < indexHeader4; l++){
-                    desti += packet[l];
-                }
-                // packet.substr(indexHeader3 + 1, indexHeader4);
-                if(packet[0] == '1'){   // it is an ACK
-                    // cout << "destination " << desti << "\n";
-                    tos[desti]->send(packet);
-                }
-                else{   // it is a packet
-                    if(queue.size() < QUEUESIZE){
-                        tos[desti]->send(packet);
-                        queue.push_back(packet);
-                    }
-                }
-                break;
-            }
-        }
-        // if((clock()-lastPacketSent)/(CLOCKS_PER_SEC/DELAYCOEF)>1){
-        //     lastPacketSent = clock();
-        //     if(queue.empty() == false){
-        //         findHeader(queue[0]);
-        //         if(indexHeader1 + 1 < indexHeader2){
-        //             string destination = queue[0].substr(indexHeader3 + 1, indexHeader3 + 12);
-        //             int id = stoi(queue[0].substr(indexHeader1 + 1, indexHeader2));
-        //             if(droppedPackets[id] == false){    
-        //                 tos[destination]->send(queue[0]);
-        //                 numOfSents++;
-        //             }
-        //             else{
-        //                 cout << "PACKET IS DROPPED\n";
-        //                 droppedPackets[id] = false;     // dont drop this anymore
-        //             }
-        //             showQueueContent();
-        //             queue.erase(queue.begin());
-        //         }
-        //     }
-        // }
+        handleTransmit(tempFd);
     }
 }  

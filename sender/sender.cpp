@@ -139,7 +139,7 @@ void Sender::run() {
         select(maxFd + 1, &tempFd, NULL, NULL, NULL);
         if (FD_ISSET(fromRouter->fd, &tempFd)){ // getfromrouter
            string message = fromRouter->receive();
-        //    cout << "Message from router: " << message << "\n";
+           cout << "Message from router: " << message << "\n";
            if(firstRound){
                 firstRound = false;
                 toRouter->send(packets[0]);
