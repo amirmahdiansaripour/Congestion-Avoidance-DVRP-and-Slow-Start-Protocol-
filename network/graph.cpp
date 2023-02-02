@@ -122,11 +122,11 @@ void Graph::writeInFiles(string source, map<string, int>dist, map<string, string
     // std::experimental::filesystem::remove("../routingtables");
     ofstream file;
     file.open(path);
-    for(vector<string> s : routingTables[source]){
-        file << s[0] << "\t" << s[1] << "\t" << s[2] << "\n";
+    vector<vector<string>> data = routingTables[source];
+    for(int i = 1; i < data.size(); i++){
+        file << data[i][0] << "\t" << data[i][1] << "\t" << data[i][2] << "\n";
     }
     file.close();
-
 }
 
 void Graph::bellmanFord(string source){
@@ -169,9 +169,8 @@ void Graph::showTable(string src){
     vector<vector<string>> data = routingTables[src];
     // cout << "Source : " << src << "\n";
     // cout << "size: " << data.size() << "\n";
-    for(vector<string> s : data){
-        // cout << "Source : " << src << "\n";
-        cout << s[0] << "\n" << s[1] << "\n" << s[2] << "\n----------------------------\n";
+    for(int i = 1; i < data.size(); i++){
+        cout << data[i][0] << "\n" << data[i][1] << "\n" << data[i][2] << "\n----------------------------\n";
     }
 }
 
