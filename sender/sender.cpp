@@ -2,20 +2,46 @@
 
 using namespace std;
 
-void Sender::extractRoutingTable(){
-    string path = "../routingtables/" + port;
-    ifstream file(path);
-    string row;
-    while(getline(file, row)){
-        
+void Sender::setSockets(){
+    if(port == "172.16.0.10"){
+        toRouter = new Socket(8001);
+        fromRouter = new Socket(8002);
+    }
+    else if(port == "172.16.0.20"){
+        toRouter = new Socket(8003);
+        fromRouter = new Socket(8004);
+    }
+    else if(port == "172.16.0.1"){
+        if(routingTable[dest_port] == "172.16.0.0"){
+            toRouter = new Socket(8005);
+            fromRouter = new Socket(8006);
+        }
+        else if(routingTable[dest_port] == "172.16.1.0"){
+            toRouter = new Socket(8007);
+            fromRouter = new Socket(8008);
+        }
     }
 }
 
-Sender::Sender(string port_, string dest_port){
+
+void Sender::extractRoutingTable(){
+    string path = "../routingtables/" + port + ".txt";
+    ifstream file(path);
+    string row;
+    while(getline(file, row)){
+        vector<string> half_split = split(row, '\t');
+        string first = split(half_split[0], ' ')[1];
+        string second = split(half_split[2], ' ')[1];
+        // cout << "first " << first << "\tsecond " << second << "\n";
+        routingTable[first] = second;
+    }
+}
+
+Sender::Sender(string port_, string dest_port_){
     port = port_;
+    dest_port = dest_port_;
     extractRoutingTable();
-    toRouter = new Socket(toRouter_);
-    fromRouter = new Socket(fromRouter_);
+    setSockets();
     lastPacketSent = 0;
     cwnd = 1;
     firstRound = true;
@@ -122,7 +148,7 @@ void Sender::run() {
            }
            else{
                 ack = extractAck(message);
-               cout<<"ACK" << ack<<endl;       
+                cout<<"ACK" << ack<<endl;       
                 if(ack == packets.size()){cout << "FINISH";break;}
                 if(ack >= lastPacketSent + 1){
                     updateCWND();
@@ -166,7 +192,7 @@ void Sender::makePackets(){
     splitIntoPackets();
     packets = vector<string>(MAXNUMOFPACKETS);
     for(int i = 0; i < MAXNUMOFPACKETS; i++){
-        packets[i] = ("0/" + to_string(i) + "/" + port + "/" + dest + "/" + content[i]);
+        packets[i] = ("0/" + to_string(i) + "/" + port + "/" + dest_port + "/" + content[i]);
         // packets[i] += content[i];
     }
 }

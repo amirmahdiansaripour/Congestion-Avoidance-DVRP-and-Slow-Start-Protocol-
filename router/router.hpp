@@ -12,22 +12,24 @@ const int DROPPROBABILITY = 10; // 0 if no need to drop
 class Router{
 private:
     std::string port;
-    Socket* toSender;
-    Socket* fromSender;
-    Socket* toReceiver;
-    Socket* fromReceiver;
-    void findHeader(std::string);
-    void decideOnDropped();
-public:
-    Router(std::string, int, int, int, int);
+    std::map<std::string, std::string> routingTable;
+    std::map<std::string, Socket*> tos;
+    std::vector<Socket*> froms;
     std::map<int, bool> droppedPackets;
-    void run();
     std::vector<int> dropped;
     std::vector<std::string> queue;
     clock_t lastPacketSent;
-    void showQueueContent();
     int numOfSents;
     int indexHeader1, indexHeader2;
+public:
+    Router(std::string);
+    int max();
+    void run();
+    void setSockets();
+    void showQueueContent();
+    void findHeader(std::string);
+    void decideOnDropped();
+    void extractRoutingTable();
 };
 
 

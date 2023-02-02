@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 #define STDIN 0
 
@@ -34,7 +35,7 @@ private:
     char buffer[255];
 };
 
-
+std::vector<std::string> split(std::string, char);
 
 
 

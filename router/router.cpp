@@ -2,13 +2,42 @@
 
 using namespace std;
 
-Router::Router(string port_, int toSender_, int fromSender_, int toReceiver_, int fromReceiver_) {
+void Router::setSockets(){
+    if(port == "172.16.0.0"){
+        froms = vector<Socket*>(5);
+        froms[0] = new Socket(8001);
+        froms[1] = new Socket(8003);
+        froms[2] = new Socket(8005);
+        froms[3] = new Socket(8009);
+        froms[4] = new Socket(8013);
+        tos["172.16.0.10"] = new Socket(8002);
+        tos["172.16.0.20"] = new Socket(8004);
+        tos["172.16.10.0"] = new Socket(8010);
+        tos["172.16.1.0"] = new Socket(8014);
+        tos["172.16.0.1"] = new Socket(8006);
+    }
+}
+
+
+void Router::extractRoutingTable(){
+    string path = "../routingtables/" + port + ".txt";
+    ifstream file(path);
+    string row;
+    while(getline(file, row)){
+        vector<string> half_split = split(row, '\t');
+        string first = split(half_split[0], ' ')[1];
+        string second = split(half_split[2], ' ')[1];
+        // cout << "first " << first << "\tsecond " << second << "\n";
+        routingTable[first] = second;
+    }
+}
+
+
+Router::Router(string port_) {
     port = port_;
-    toSender=new Socket(toSender_);
-    fromSender=new Socket(fromSender_);
-    toReceiver=new Socket(toReceiver_);
-    fromReceiver=new Socket(fromReceiver_);
     lastPacketSent = clock();
+    extractRoutingTable();
+    setSockets();
     decideOnDropped();
 }
 
@@ -26,11 +55,15 @@ void Router::decideOnDropped(){
     }
 }
 
-int max(int a, int b, int c, int d){
-    int res = a;
-    if(b > res) res = b;
-    if(c > res) res = c;
-    if(d > res) res = d;
+int Router::max(){
+    int res = froms[0]->fd;
+    for(int i = 1; i < froms.size(); i++)
+        if(froms[i]->fd > res) res = froms[i]->fd;
+    
+    map<string, Socket*> :: iterator it;
+    for(it = tos.begin(); it != tos.end(); it++)
+        if(it->second->fd > res) res = it->second->fd;
+    
     return res;
 }
 
@@ -62,46 +95,47 @@ void Router::showQueueContent(){
 void Router::run() {
     fd_set currFd, tempFd;
     FD_ZERO(&currFd);
-    int maxFd = max(fromReceiver->fd, fromSender->fd, toSender->fd, toReceiver->fd);
-    FD_SET(fromSender->fd, &currFd);
-    FD_SET(toSender->fd, &currFd);
-    FD_SET(fromReceiver->fd, &currFd);
-    FD_SET(toReceiver->fd, &currFd);
+    int maxFd = max();
+    for(int i = 1; i < froms.size(); i++)
+        FD_SET(froms[i]->fd, &currFd);
     int counter = 0;
     while (true){
         tempFd = currFd;
         select(maxFd + 1, &tempFd, NULL, NULL, NULL);
-        if (FD_ISSET(fromSender->fd, &tempFd)){
-        //    cout<<"Sender side"<<endl;
-           string packet = fromSender->receive();
-           if(queue.size() < QUEUESIZE){
-               queue.push_back(packet);
-            //    cout << "queu.size() " << queue.size() << "\n";
-            }
-        }
-        else if (FD_ISSET(fromReceiver->fd, &tempFd)){
-            string ackMessage = fromReceiver->receive();   
-            toSender->send(ackMessage);
-        }
-        if((clock()-lastPacketSent)/(CLOCKS_PER_SEC/DELAYCOEF)>1){
-            lastPacketSent = clock();
-            if(queue.empty() == false){
-                findHeader(queue[0]);
-                if(indexHeader1 + 1 < indexHeader2){
-                    int id = stoi(queue[0].substr(indexHeader1 + 1, indexHeader2));
-                    if(droppedPackets[id] == false){    
-                        toReceiver->send(queue[0]);
-                        numOfSents++;
-                    }
-                    else{
-                        cout << "PACKET IS DROPPED\n";
-                        droppedPackets[id] = false;     // dont drop this anymore
-                    }
-                    showQueueContent();
-                    queue.erase(queue.begin());
+        for(int i = 0; i < froms.size(); i++){
+            if(FD_ISSET(froms[i]->fd, &tempFd)){
+                string packet = froms[i]->receive();
+                cout << "PACKET: " << packet << "\n";
+                if(queue.size() < QUEUESIZE){
+                    queue.push_back(packet);
                 }
+                break;
             }
         }
+
+        // else if (FD_ISSET(fromReceiver->fd, &tempFd)){
+        //     string ackMessage = fromReceiver->receive();   
+        //     toSender->send(ackMessage);
+        // }
+        // if((clock()-lastPacketSent)/(CLOCKS_PER_SEC/DELAYCOEF)>1){
+        //     lastPacketSent = clock();
+        //     if(queue.empty() == false){
+        //         findHeader(queue[0]);
+        //         if(indexHeader1 + 1 < indexHeader2){
+        //             int id = stoi(queue[0].substr(indexHeader1 + 1, indexHeader2));
+        //             if(droppedPackets[id] == false){    
+        //                 toReceiver->send(queue[0]);
+        //                 numOfSents++;
+        //             }
+        //             else{
+        //                 cout << "PACKET IS DROPPED\n";
+        //                 droppedPackets[id] = false;     // dont drop this anymore
+        //             }
+        //             showQueueContent();
+        //             queue.erase(queue.begin());
+        //         }
+        //     }
+        // }
     }
 
 }  

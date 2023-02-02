@@ -2,6 +2,21 @@
 
 using namespace std;
 
+vector<string> split(string unsplitted, char delimeter){
+    string split = "";
+    vector<string> lastRes;
+    for(int i = 0; i < unsplitted.size(); i++){
+        if(unsplitted[i] == delimeter){
+            lastRes.push_back(split);
+            split = "";
+        }
+        else
+            split.push_back(unsplitted[i]);
+    }
+    lastRes.push_back(split);
+    return lastRes;
+}
+
 Socket::Socket(int port) {
     int tcpFd = socket(AF_INET, SOCK_DGRAM, 0);
     int broadcast = 1, opt_en = 1;

@@ -2,11 +2,12 @@
 #define __SENDER_H__
 
 #include <math.h>
+#include <map>
 #include <fstream>
 #include "../socket/socket.hpp"
 
 
-const std::string dest = "172.16.0.1";
+// const std::string dest = "172.16.0.1";
 const int MAXNUMOFPACKETS = 1100;
 const int INF = 10000;
 const int NEWLINE = 127;
@@ -25,6 +26,7 @@ public:
     void splitIntoPackets();
     void makePackets();
     void extractRoutingTable();
+    void setSockets();
 private:
     clock_t start;
     clock_t end;
@@ -38,7 +40,7 @@ private:
     int lastPacketSent;
     int ack;
     int cwnd;
-    std::string port;
+    std::string port, dest_port;
     clock_t lastDepart;
     bool firstRound;
     int treshold;
