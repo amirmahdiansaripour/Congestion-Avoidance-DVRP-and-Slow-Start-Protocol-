@@ -69,7 +69,7 @@ void Graph::DVRP(){
                     table[make_pair(*po, *xy)] = table[make_pair(*po, *it)] + table[make_pair(*it, *xy)];
             }
         }
-        printIteration(table, iter);
+        // printIteration(table, iter);
         iter++;
     }
     end = clock();
@@ -108,8 +108,10 @@ void Graph::writeInFiles(string source, map<string, int>dist, map<string, string
             int dis = dist[*t];
             string temp = *t;
             // cout << "Node " << *t << " and its parent " << parent[*t] << "\n";
-            while(parent[temp] != source){
+            int counter = 0;
+            while(parent[temp] != source && counter <= nodes.size()){
                 temp = parent[temp];
+                counter++;
                 // cout << "HI\n";
             }
             routingTables[source].push_back({("Node: " + nod), ("Dist: " + to_string(dis)), ("Interface: " + temp)});
@@ -159,12 +161,16 @@ void Graph::bellmanFord(string source){
             }
         }
     }
+    // cout << "HI\n";
     writeInFiles(source, dist, parent);
 }
 
 void Graph::showTable(string src){
     vector<vector<string>> data = routingTables[src];
+    // cout << "Source : " << src << "\n";
+    // cout << "size: " << data.size() << "\n";
     for(vector<string> s : data){
+        // cout << "Source : " << src << "\n";
         cout << s[0] << "\n" << s[1] << "\n" << s[2] << "\n----------------------------\n";
     }
 }

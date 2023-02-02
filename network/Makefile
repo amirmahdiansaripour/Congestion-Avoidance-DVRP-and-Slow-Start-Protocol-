@@ -27,4 +27,3 @@ graph.out:	$(OBJECTS)
 clean:
 	rm -rf $(BUILD_DIR) *.o
 	rm -rf $(BUILD_DIR) *.out
-	
