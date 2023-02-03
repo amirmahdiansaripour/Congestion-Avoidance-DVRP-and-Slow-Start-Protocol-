@@ -15,7 +15,7 @@ private:
     std::map<std::string, std::string> routingTable;
     std::map<std::string, Socket*> tos;
     std::vector<Socket*> froms;
-    Socket *fromSender, *fromReceiver, *toReceiver, *toSender;
+    Socket *fromSender1, *fromReceiver1, *toReceiver1, *toSender1, *fromSender2, *fromReceiver2, *toReceiver2, *toSender2;
     std::map<int, bool> droppedPackets;
     std::vector<int> dropped;
     int firstTransmit;
@@ -25,10 +25,13 @@ private:
     int indexHeader1, indexHeader2, indexHeader3, indexHeader4;
 public:
     Router(std::string);
-    int max();
     void run();
-    void handleTransmit(fd_set);
-    void handleNextPackets();
+    void handleTimeout(Socket*);
+    void handleDirectLines();
+    void handleSingleSockets();
+    void handleTransmit();
+    void handleMultiConnections();
+    // void handleNextPackets();
     void setSockets();
     void showQueueContent();
     void findHeader(std::string);

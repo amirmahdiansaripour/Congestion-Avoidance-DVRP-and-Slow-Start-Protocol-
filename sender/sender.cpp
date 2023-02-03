@@ -21,6 +21,30 @@ void Sender::setSockets(){
             fromRouter = new Socket(8008);
         }
     }
+    else if(port == "172.16.0.2"){
+        toRouter = new Socket(8011);
+        fromRouter = new Socket(8012);
+    }
+    else if(port == "172.16.1.50"){
+        if(routingTable[dest_port] == "172.16.1.0"){
+            toRouter = new Socket(8021);
+            fromRouter = new Socket(8022);
+        }
+        else if(routingTable[dest_port] == "172.16.10.0"){
+            toRouter = new Socket(8015);
+            fromRouter = new Socket(8016);
+        }
+    }
+    else if(port == "172.16.19.172"){
+        if(routingTable[dest_port] == "172.16.1.0"){
+            toRouter = new Socket(8023);
+            fromRouter = new Socket(8024);
+        }
+        else if(routingTable[dest_port] == "172.16.29.0"){
+            toRouter = new Socket(8019);
+            fromRouter = new Socket(8020);
+        }
+    }
 }
 
 
@@ -143,6 +167,7 @@ void Sender::run() {
            if(firstRound){
                 firstRound = false;
                 toRouter->send(packets[0]);
+                cout << "ACK0" << "\n";
                 lastPacketSent = 0;
                 lastDepart = clock();
            }
@@ -199,13 +224,11 @@ void Sender::makePackets(){
 
 void Sender::splitIntoPackets(){
     ifstream read("t.txt");
-    // ofstream writee("f.txt");
     string largeString;
     string additive;
     while (getline (read, additive)) {
       largeString += additive;
     }
-    // cout << "SIZE: " << largeString.size() << "\n";
     read.close();
     int index = 0;
     int offset = (int) (largeString.size() / MAXNUMOFPACKETS);

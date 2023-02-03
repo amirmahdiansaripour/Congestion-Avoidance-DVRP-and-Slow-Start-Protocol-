@@ -23,6 +23,7 @@ Socket::Socket(int port) {
     setsockopt(tcpFd, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast));
     setsockopt(tcpFd, SOL_SOCKET, SO_REUSEPORT, &opt_en, sizeof(opt_en));
     fd = tcpFd;
+    pp = port;
     bus.sin_family = AF_INET;
     bus.sin_port = htons(port);
     bus.sin_addr.s_addr = inet_addr("localhost");

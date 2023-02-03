@@ -29,6 +29,7 @@ public:
     std::string receive();
     int getFd();
     int fd;
+    int pp;
 private:
     int socketPort;
     struct sockaddr_in bus;
