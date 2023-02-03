@@ -11,17 +11,14 @@ void Receiver::setSockets(){
         toRouter = new Socket(8003);
         fromRouter = new Socket(8004);
     }
-    else if(port == "172.16.0.1"){
-        if(routingTable[dest_port] == "172.16.0.0"){
-            toRouter = new Socket(8005);
-            fromRouter = new Socket(8006);
-        }
+    else if(port == "172.16.29.1"){
+        toRouter = new Socket(8029);
+        fromRouter = new Socket(8030);
     }
-    //     else if(routingTable[dest_port] == "172.16.1.0"){
-    //         toRouter = new Socket(8007);
-    //         fromRouter = new Socket(8008);
-    //     }
-    // }
+    else if(port == "172.16.2.1"){
+        toRouter = new Socket(8032);
+        fromRouter = new Socket(8033);
+    }
 }
 
 void Receiver::extractRoutingTable(){
