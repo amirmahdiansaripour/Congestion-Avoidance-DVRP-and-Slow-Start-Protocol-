@@ -4,6 +4,7 @@
 #include <math.h>
 #include <map>
 #include <fstream>
+#include "../network/logger.hpp"
 #include "../socket/socket.hpp"
 
 

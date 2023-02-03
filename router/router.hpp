@@ -1,6 +1,7 @@
 #ifndef __ROUTER_H__
 #define __ROUTER_H__
 
+#include "../network/logger.hpp"
 #include"../socket/socket.hpp"
 #include <map>
 

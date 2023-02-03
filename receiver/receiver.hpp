@@ -1,6 +1,7 @@
 #ifndef __RECEIVER_H__
 #define __RECEIVER_H__
 
+#include "../network/logger.hpp"
 #include "../socket/socket.hpp"
 #include <map>
 #include <fstream>
