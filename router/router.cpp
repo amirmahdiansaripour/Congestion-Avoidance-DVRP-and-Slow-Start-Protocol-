@@ -152,7 +152,7 @@ void Router::handleTimeout(Socket* soc){
         if(indexHeader1 + 1 < indexHeader2){
             int id = stoi(queue[0].substr(indexHeader1 + 1, indexHeader2));
             if(droppedPackets[id] == false){    
-                soc->send(queue[0]);
+                soc->send(queue[0]);    
             }
             else{
                 cout << "PACKET IS DROPPED\n";
@@ -181,13 +181,11 @@ void Router::handleSingleSockets(){
             if(queue.size() < QUEUESIZE){
                 queue.push_back(packet);
             }
-            // cout << "PACKER RECEIVED FROM: " + fromSender1->pp << "\n";
         }
         if (FD_ISSET(fromReceiver1->fd, &tempFd)){
             // cout << "HIHI\n";
             string ackMessage = fromReceiver1->receive();   
             // cout << ackMessage << "\n";
-            // cout << "PACKER RECEIVED FROM: " + fromReceiver1->pp << "\n";
             toSender1->send(ackMessage);
         }
         if((clock()-lastPacketSent)/(CLOCKS_PER_SEC/DELAYCOEF)>1){
@@ -217,22 +215,18 @@ void Router::handleDirectLines(){
             if(queue.size() < QUEUESIZE){
                 queue.push_back(packet);
             }
-            // cout << "PACKER RECEIVED FROM: " << fromSender1->pp << "\n";
         }
         if(FD_ISSET(fromSender2->fd, &tempFd)){
             string packet = fromSender2->receive();
-            // cout << "PACKER RECEIVED FROM: " << fromSender2->pp << "\n";
             if(queue.size() < QUEUESIZE){
                 queue.push_back(packet);
             }
         }
         if(FD_ISSET(fromReceiver1->fd, &tempFd)){
-            // cout << "PACKER RECEIVED FROM: " << fromReceiver1->pp << "\n";
             string ackMessage = fromReceiver1->receive();   
             toSender1->send(ackMessage);
         }
         if (FD_ISSET(fromReceiver2->fd, &tempFd)){
-            // cout << "PACKER RECEIVED FROM: " << fromReceiver2->pp << "\n";
             string ackMessage = fromReceiver2->receive();  
             // cout << ackMessage << "\n"; 
             toSender2->send(ackMessage);
@@ -272,11 +266,9 @@ void Router::handleMultiConnections(){
             if(queue.size() < QUEUESIZE){
                 queue.push_back(packet);
             }
-        // cout << "PACKER RECEIVED FROM: " << fromSender1->pp << "\n";
         }
         if(FD_ISSET(fromReceiver1->fd, &tempFd)){   // equals fromSender2
             string packet = fromReceiver1->receive();
-            // cout << "PACKER RECEIVED FROM: " << fromReceiver1->pp << "\n";
             if(packet[0] == '0'){   //PACKET
                 if(queue.size() < QUEUESIZE){
                     queue.push_back(packet);
@@ -288,7 +280,6 @@ void Router::handleMultiConnections(){
         }
         else if(FD_ISSET(fromReceiver2->fd, &tempFd)){
             string ackMessage = fromReceiver2->receive();   
-            // cout << "PACKER RECEIVED FROM: " << fromReceiver2->pp << "\n";
             toReceiver1->send(ackMessage);
         }
         if((clock()-lastPacketSent)/(CLOCKS_PER_SEC/DELAYCOEF)>1){

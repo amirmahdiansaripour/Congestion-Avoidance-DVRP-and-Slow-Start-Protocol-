@@ -109,6 +109,7 @@ bool Receiver::handlePacket(string packet){
     string message = makeAckMessage(lostPacket);
     // cout << "Messsage to router: " << message << "\n";
     toRouter->send(message);
+    logger.add("ACK IS SENT ON PORT " + to_string(toRouter->pp));
     if(lostPacket == MAXNUMOFPACKETS) return true;
     else return false;
 }
@@ -127,19 +128,23 @@ void Receiver::run(){
         select(maxFd + 1, &tmpFd, NULL, NULL, NULL);
         if (FD_ISSET(fromRouter->fd, &tmpFd)){ // message from router
             string packet = fromRouter->receive(); 
+            logger.add("PACKET IS RECEIVED FROM ROUTER ON PORT " + to_string(fromRouter->pp));
             if(dest_port == ""){
                 sendAck(packet);
                 int ind;
                 for(ind = indexHeader2 + 1; ind < indexHeader3; ind++) dest_port += packet[ind]; 
             }
             bool res = handlePacket(packet);
-            if(res) break;
+            if(res){
+                logger.finalWrite();
+                break;
+            }
         }
         if(FD_ISSET(STDIN_FILENO, &tmpFd)){     // message to router
             string message;
             cin>>message;
-            cout << "MM\n";
             toRouter->send(message);
+            logger.add("ACK IS SENT ON PORT " + to_string(toRouter->pp));
         }
     }
 }

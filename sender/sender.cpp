@@ -142,6 +142,7 @@ void Sender::sendPacketsBasedCwd(){
             // cout << "index1 " << indexHeader1 << " index2 " << indexHeader2 << "\n";
             cout << "sent to Router: " << packets[i].substr(0, indexHeader2) << "\n";
             toRouter->send(packets[i]);
+            logger.add("PACKET IS SENT ON PORT " + to_string(toRouter->pp));
         }
     }
     int first = lastPacketSent;
@@ -174,7 +175,12 @@ void Sender::run() {
            else{
                 ack = extractAck(message);
                 cout<<"ACK" << ack<<endl;       
-                if(ack == packets.size()){cout << "FINISH";break;}
+                logger.add("ACK" + to_string(ack) + " IS RECEIVED ON PORT " + to_string(fromRouter->pp));
+                if(ack == packets.size()){
+                    logger.finalWrite();
+                    cout << "FINISH";
+                    break;
+                }
                 if(ack >= lastPacketSent + 1){
                     updateCWND();
                 }

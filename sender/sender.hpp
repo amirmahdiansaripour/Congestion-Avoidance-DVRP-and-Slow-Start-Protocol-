@@ -28,6 +28,7 @@ public:
     void makePackets();
     void extractRoutingTable();
     void setSockets();
+    Logger logger;
 private:
     clock_t start;
     clock_t end;

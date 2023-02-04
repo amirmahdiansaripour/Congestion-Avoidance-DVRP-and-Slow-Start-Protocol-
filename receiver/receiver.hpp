@@ -25,6 +25,7 @@ public:
 private:
     std::vector<bool>Acks;
     Socket* toRouter;
+    Logger logger;
     Socket* fromRouter;
     std::map<std::string, std::string> routingTable;
     std::string port, dest_port;

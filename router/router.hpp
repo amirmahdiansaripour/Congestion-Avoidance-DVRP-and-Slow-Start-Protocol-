@@ -5,10 +5,10 @@
 #include"../socket/socket.hpp"
 #include <map>
 
-const int QUEUESIZE = 10;   // infinity (10000) is the first case
+const int QUEUESIZE = 5;   // infinity (10000) is the first case
 const int MAXNUMOFPACKETS = 1100;
 const int DELAYCOEF = 100;
-const int DROPPROBABILITY = 10; // 0 if no need to drop
+const int DROPPROBABILITY = 0; // 0 if no need to drop
 
 class Router{
 private:
@@ -23,6 +23,7 @@ private:
     std::vector<std::string> queue;
     clock_t lastPacketSent;
     int numOfSents;
+    Logger logger;
     int indexHeader1, indexHeader2, indexHeader3, indexHeader4;
 public:
     Router(std::string);
