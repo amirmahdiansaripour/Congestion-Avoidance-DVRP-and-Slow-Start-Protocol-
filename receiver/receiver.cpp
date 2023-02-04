@@ -33,7 +33,6 @@ void Receiver::extractRoutingTable(){
 void Receiver::rerun(){
     Acks = vector<bool>(MAX_PACKET_IND, false);
     content = vector<string>(MAXNUMOFPACKETS);
-    cout << "content size: " << content.size() << "\n";
     run();
 }
 
@@ -125,9 +124,9 @@ bool Receiver::handlePacket(string packet){
     logger.add("ACK IS SENT ON PORT " + to_string(toRouter->pp));
     if(lostPacket == MAXNUMOFPACKETS){
         if(port == "172.16.29.1"){  // again
+            reconstructFile();
             Acks = vector<bool>(MAX_PACKET_IND, false);
             content = vector<string>(MAXNUMOFPACKETS);
-            reconstructFile();
             toRouter->send("1/1010/" + port + "/" + dest_port + "/0");
             return false;
         }

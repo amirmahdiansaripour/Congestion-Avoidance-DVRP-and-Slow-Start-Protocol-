@@ -220,7 +220,6 @@ void Sender::makePackets(){
 void Sender::splitIntoPackets(){
     string path = "one.txt";
     if(port == "172.16.1.50"){
-        cout << "IM LARGE\n";
         path = "twenty.txt";
     }
     ifstream read(path);
