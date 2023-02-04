@@ -41,8 +41,8 @@ Receiver::Receiver(string port_){
     MAXNUMOFPACKETS = 1100;
     port = port_;
     if(port == "172.16.2.1"){
-        MAX_PACKET_IND = 3330;
-        MAXNUMOFPACKETS = 3300;
+        MAX_PACKET_IND = 6660;
+        MAXNUMOFPACKETS = 6600;
     }
     numberOfRuns = 0;
     extractRoutingTable();

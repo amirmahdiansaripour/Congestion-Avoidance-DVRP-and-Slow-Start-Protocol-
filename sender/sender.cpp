@@ -46,7 +46,7 @@ Sender::Sender(string port_, string dest_port_){
     port = port_;
     dest_port = dest_port_;
     if(port == "172.16.1.50"){
-        MAXNUMOFPACKETS = 3300;
+        MAXNUMOFPACKETS = 6600;
     }
     lastPacketSent = 0;
     cwnd = 1;
