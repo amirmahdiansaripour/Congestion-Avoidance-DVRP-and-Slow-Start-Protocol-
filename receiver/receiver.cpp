@@ -7,10 +7,6 @@ void Receiver::setSockets(){
         toRouter = new Socket(8001);
         fromRouter = new Socket(8002);
     }
-    else if(port == "172.16.0.20"){
-        toRouter = new Socket(8003);
-        fromRouter = new Socket(8004);
-    }
     else if(port == "172.16.29.1"){
         toRouter = new Socket(8029);
         fromRouter = new Socket(8030);
@@ -34,13 +30,25 @@ void Receiver::extractRoutingTable(){
     }
 }
 
-
-Receiver::Receiver(string port_){
-    port = port_;
-    extractRoutingTable();
-    setSockets();
+void Receiver::rerun(){
     Acks = vector<bool>(MAX_PACKET_IND, false);
     content = vector<string>(MAXNUMOFPACKETS);
+    cout << "content size: " << content.size() << "\n";
+    run();
+}
+
+Receiver::Receiver(string port_){
+    MAX_PACKET_IND = 1110;
+    MAXNUMOFPACKETS = 1100;
+    port = port_;
+    if(port == "172.16.2.1"){
+        MAX_PACKET_IND = 3330;
+        MAXNUMOFPACKETS = 3300;
+    }
+    numberOfRuns = 0;
+    extractRoutingTable();
+    setSockets();
+    rerun();
 }
 
 void Receiver::sendAck(string packet){
@@ -84,7 +92,13 @@ int Receiver::searchFirstLost(){
 }
 
 void Receiver::reconstructFile(){
-    ofstream res ("result.txt");
+    string path = "result" + port;
+    if(port == "172.16.29.1"){
+        path += to_string(numberOfRuns);
+        numberOfRuns++;
+    }
+    path += ".txt";
+    ofstream res (path);
     string testString = "";
     for(int i = 0; i < MAXNUMOFPACKETS; i++){
       testString += content[i];
@@ -108,10 +122,25 @@ bool Receiver::handlePacket(string packet){
     int lostPacket = searchFirstLost();
     string message = makeAckMessage(lostPacket);
     // cout << "Messsage to router: " << message << "\n";
-    toRouter->send(message);
     logger.add("ACK IS SENT ON PORT " + to_string(toRouter->pp));
-    if(lostPacket == MAXNUMOFPACKETS) return true;
-    else return false;
+    if(lostPacket == MAXNUMOFPACKETS){
+        if(port == "172.16.29.1"){  // again
+            Acks = vector<bool>(MAX_PACKET_IND, false);
+            content = vector<string>(MAXNUMOFPACKETS);
+            reconstructFile();
+            toRouter->send("1/1010/" + port + "/" + dest_port + "/0");
+            return false;
+        }
+        else{
+            toRouter->send(message);
+            return true;
+        } 
+        
+    }
+    else{
+        toRouter->send(message);    
+        return false;
+    }
 }
 
 void Receiver::run(){
@@ -123,6 +152,7 @@ void Receiver::run(){
     FD_SET(toRouter->fd, &currFd);
     int lastAck = 0;
     int cumulativeAck;
+    toRouter->send("1/1010/" + port + "/" + dest_port + "/0");
     while (true){
         tmpFd = currFd;
         select(maxFd + 1, &tmpFd, NULL, NULL, NULL);

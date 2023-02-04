@@ -7,6 +7,5 @@ int main(int argc, char* argv[]){   //ip, toRouter, fromRouter
     // int toRouter = atoi(argv[2]);
     // int fromRouter = atoi(argv[3]);
     Sender sender = Sender(port, destPort);
-    sender.run();
     sender.recordData();
 }

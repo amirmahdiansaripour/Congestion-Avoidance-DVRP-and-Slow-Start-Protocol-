@@ -3,47 +3,17 @@
 using namespace std;
 
 void Sender::setSockets(){
-    if(port == "172.16.0.10"){
-        toRouter = new Socket(8001);
-        fromRouter = new Socket(8002);
-    }
-    else if(port == "172.16.0.20"){
-        toRouter = new Socket(8003);
-        fromRouter = new Socket(8004);
-    }
-    else if(port == "172.16.0.1"){
-        if(routingTable[dest_port] == "172.16.0.0"){
-            toRouter = new Socket(8005);
-            fromRouter = new Socket(8006);
-        }
-        else if(routingTable[dest_port] == "172.16.1.0"){
-            toRouter = new Socket(8007);
-            fromRouter = new Socket(8008);
-        }
-    }
-    else if(port == "172.16.0.2"){
-        toRouter = new Socket(8011);
-        fromRouter = new Socket(8012);
+    if(port == "172.16.0.1"){
+        toRouter = new Socket(8007);
+        fromRouter = new Socket(8008);
     }
     else if(port == "172.16.1.50"){
-        if(routingTable[dest_port] == "172.16.1.0"){
-            toRouter = new Socket(8021);
-            fromRouter = new Socket(8022);
-        }
-        else if(routingTable[dest_port] == "172.16.10.0"){
-            toRouter = new Socket(8015);
-            fromRouter = new Socket(8016);
-        }
+        toRouter = new Socket(8015);
+        fromRouter = new Socket(8016);
     }
     else if(port == "172.16.19.172"){
-        if(routingTable[dest_port] == "172.16.1.0"){
-            toRouter = new Socket(8023);
-            fromRouter = new Socket(8024);
-        }
-        else if(routingTable[dest_port] == "172.16.29.0"){
-            toRouter = new Socket(8019);
-            fromRouter = new Socket(8020);
-        }
+        toRouter = new Socket(8023);
+        fromRouter = new Socket(8024);
     }
 }
 
@@ -61,22 +31,37 @@ void Sender::extractRoutingTable(){
     }
 }
 
-Sender::Sender(string port_, string dest_port_){
-    port = port_;
-    dest_port = dest_port_;
-    extractRoutingTable();
-    setSockets();
+void Sender::rerun(){
     lastPacketSent = 0;
     cwnd = 1;
     firstRound = true;
-    makePackets();
+    content.clear();
+    content = vector<string>(MAXNUMOFPACKETS);
+    start = clock();
+    run();
+}
+
+Sender::Sender(string port_, string dest_port_){
+    MAXNUMOFPACKETS = 1100;
+    port = port_;
+    dest_port = dest_port_;
+    if(port == "172.16.1.50"){
+        MAXNUMOFPACKETS = 3300;
+    }
+    lastPacketSent = 0;
+    cwnd = 1;
+    firstRound = true;
+    content = vector<string>(MAXNUMOFPACKETS);
     start = clock();
     treshold = INF;
     threasholds.push_back(1e9);
+    setSockets();
+    makePackets();
+    rerun();
 }
 
 void Sender::recordData(){
-    ofstream file("reports.txt");
+    ofstream file("reports" + port + ".txt");
     end = clock();
     int duration = (end - start)/(CLOCKS_PER_SEC);
     file << "Duration: " << duration << " s\n";
@@ -158,7 +143,6 @@ void Sender::run() {
     FD_SET(STDIN_FILENO, &currFd);
     FD_SET(fromRouter->fd, &currFd);
     FD_SET(toRouter->fd, &currFd);
-    
     while (true){
         tempFd = currFd;
         select(maxFd + 1, &tempFd, NULL, NULL, NULL);
@@ -173,13 +157,19 @@ void Sender::run() {
                 lastDepart = clock();
            }
            else{
+                cout << message << "\n";
                 ack = extractAck(message);
                 cout<<"ACK" << ack<<endl;       
                 logger.add("ACK" + to_string(ack) + " IS RECEIVED ON PORT " + to_string(fromRouter->pp));
                 if(ack == packets.size()){
-                    logger.finalWrite();
-                    cout << "FINISH";
-                    break;
+                    if(port == "172.16.0.1"){
+                        rerun();    // start sending the packet again
+                    }
+                    else{
+                        logger.finalWrite();
+                        cout << "FINISH";
+                        break;
+                    }
                 }
                 if(ack >= lastPacketSent + 1){
                     updateCWND();
@@ -224,12 +214,16 @@ void Sender::makePackets(){
     packets = vector<string>(MAXNUMOFPACKETS);
     for(int i = 0; i < MAXNUMOFPACKETS; i++){
         packets[i] = ("0/" + to_string(i) + "/" + port + "/" + dest_port + "/" + content[i]);
-        // packets[i] += content[i];
     }
 }
 
 void Sender::splitIntoPackets(){
-    ifstream read("t.txt");
+    string path = "one.txt";
+    if(port == "172.16.1.50"){
+        cout << "IM LARGE\n";
+        path = "twenty.txt";
+    }
+    ifstream read(path);
     string largeString;
     string additive;
     while (getline (read, additive)) {
@@ -251,6 +245,6 @@ void Sender::splitIntoPackets(){
         }
       }
       index += offset;
-      content.push_back(t);
+      content[i] = t;
     }
 }

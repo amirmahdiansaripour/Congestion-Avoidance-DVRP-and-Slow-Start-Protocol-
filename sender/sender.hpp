@@ -9,7 +9,6 @@
 
 
 // const std::string dest = "172.16.0.1";
-const int MAXNUMOFPACKETS = 1100;
 const int INF = 10000;
 const int NEWLINE = 127;
 const int DELAYCOEF = 1;    // increase leads to long timeouts
@@ -28,9 +27,11 @@ public:
     void makePackets();
     void extractRoutingTable();
     void setSockets();
+    void rerun();
     Logger logger;
 private:
     clock_t start;
+    int MAXNUMOFPACKETS;
     clock_t end;
     std::vector<int> cwnds;
     std::vector<int> threasholds;

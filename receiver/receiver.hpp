@@ -7,8 +7,6 @@
 #include <fstream>
 #include <string>
 
-const int MAX_PACKET_IND = 1110;
-const int MAXNUMOFPACKETS = 1100;
 // const std::string dest = "127.0.0.1";
 
 class Receiver{
@@ -22,6 +20,7 @@ public:
     void reconstructFile();
     void extractRoutingTable();
     std::string makeAckMessage(int);
+    void rerun();
 private:
     std::vector<bool>Acks;
     Socket* toRouter;
@@ -30,7 +29,9 @@ private:
     std::map<std::string, std::string> routingTable;
     std::string port, dest_port;
     std::vector<std::string> content;
+    int numberOfRuns;
     int indexHeader1, indexHeader2, indexHeader3, indexHeader4;
+    int MAX_PACKET_IND, MAXNUMOFPACKETS;
 };
 
 

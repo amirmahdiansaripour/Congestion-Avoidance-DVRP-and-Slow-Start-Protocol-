@@ -185,7 +185,6 @@ void Router::handleSingleSockets(){
         if (FD_ISSET(fromReceiver1->fd, &tempFd)){
             // cout << "HIHI\n";
             string ackMessage = fromReceiver1->receive();   
-            // cout << ackMessage << "\n";
             toSender1->send(ackMessage);
         }
         if((clock()-lastPacketSent)/(CLOCKS_PER_SEC/DELAYCOEF)>1){
